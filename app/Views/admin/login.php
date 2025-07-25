@@ -111,6 +111,7 @@
 
                 <!-- Login Form -->
                 <form method="post" action="/login" class="space-y-4" id="loginForm">
+                <?= csrf_field() ?>
                 
                 <!-- Username Field -->
                 <div class="group">
