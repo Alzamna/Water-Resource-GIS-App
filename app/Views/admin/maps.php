@@ -213,10 +213,6 @@
 </div>
 <?= $this->endSection() ?>
 
-    <?php if (isset($include_leaflet) && $include_leaflet): ?>
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <?php endif; ?>
-
 <?= $this->section('scripts') ?>
 <script>
     let map;

@@ -248,7 +248,8 @@
                                     <input type="number" name="latitude" id="locationLat" step="any" required 
                                            value="<?= old('latitude') ?>"
                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                                           placeholder="-6.2088">
+                                           placeholder="-6.2088"
+                                           onchange="updateMarkerFromInput()">
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-slate-700 mb-2">
@@ -258,7 +259,8 @@
                                     <input type="number" name="longitude" id="locationLng" step="any" required 
                                            value="<?= old('longitude') ?>"
                                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                                           placeholder="106.8456">
+                                           placeholder="106.8456"
+                                           onchange="updateMarkerFromInput()">
                                 </div>
                             </div>
                             
@@ -293,16 +295,16 @@
                                     <i class="fas fa-image mr-1 text-sky-600"></i>
                                     Foto Lokasi (Opsional)
                                 </label>
-                                <div class="drag-drop-area" id="dragDropArea">
+                                <div class="drag-drop-area border-2 border-dashed border-slate-300 rounded-lg p-6 text-center transition-all duration-300 hover:border-sky-400" id="dragDropArea">
                                     <input type="file" name="photo" id="locationPhoto" accept="image/*" class="hidden">
                                     <div id="dropText">
                                         <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2"></i>
-                                        <p class="text-slate-600">Drag & drop foto atau <span class="text-sky-600 cursor-pointer" onclick="document.getElementById('locationPhoto').click()">klik untuk pilih</span></p>
+                                        <p class="text-slate-600">Drag & drop foto atau <span class="text-sky-600 cursor-pointer hover:text-sky-700" onclick="document.getElementById('locationPhoto').click()">klik untuk pilih</span></p>
                                         <p class="text-xs text-slate-500 mt-1">Format: JPG, PNG, GIF (Max: 2MB)</p>
                                     </div>
                                     <div id="imagePreview" class="hidden">
-                                        <img id="previewImg" class="image-preview mx-auto mb-2">
-                                        <button type="button" onclick="removeImage()" class="text-red-600 text-sm hover:text-red-800">
+                                        <img id="previewImg" class="max-w-full max-h-48 object-cover rounded-lg mx-auto mb-2">
+                                        <button type="button" onclick="removeImage()" class="text-red-600 text-sm hover:text-red-800 transition-colors">
                                             <i class="fas fa-trash mr-1"></i>
                                             Hapus Foto
                                         </button>
@@ -337,7 +339,7 @@
                         </div>
                     </div>
                     
-                    <div id="map"></div>
+                    <div id="map" style="height: 400px; border-radius: 12px; border: 1px solid #e2e8f0;"></div>
                     
                     <!-- Map Tips -->
                     <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
@@ -350,6 +352,7 @@
                             <li>• Gunakan scroll mouse untuk zoom in/out</li>
                             <li>• Drag peta untuk menggeser tampilan</li>
                             <li>• Marker merah menunjukkan lokasi yang dipilih</li>
+                            <li>• Input koordinat manual juga akan memperbarui marker</li>
                         </ul>
                     </div>
                 </div>
@@ -369,7 +372,8 @@
             map = L.map('map').setView([-6.2088, 106.8456], 10);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
+                attribution: '© OpenStreetMap contributors',
+                maxZoom: 19
             }).addTo(map);
 
             // Add click event to map for selecting location
@@ -381,21 +385,10 @@
                 document.getElementById('locationLat').value = lat;
                 document.getElementById('locationLng').value = lng;
                 
-                // Remove existing marker
-                if (currentMarker) {
-                    map.removeLayer(currentMarker);
-                }
+                // Update marker
+                updateMarker(lat, lng);
                 
-                // Add new marker
-                currentMarker = L.marker([lat, lng], {
-                    icon: L.divIcon({
-                        html: '<div style="background-color: #ef4444; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><i class="fas fa-map-pin" style="color: white; font-size: 12px;"></i></div>',
-                        className: 'custom-div-icon',
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
-                    })
-                }).addTo(map);
-                
+                // Show notification
                 showNotification('Koordinat berhasil diisi dari peta!', 'success');
             });
 
@@ -403,42 +396,39 @@
             const lat = document.getElementById('locationLat').value;
             const lng = document.getElementById('locationLng').value;
             
-            if (lat && lng) {
-                currentMarker = L.marker([lat, lng], {
-                    icon: L.divIcon({
-                        html: '<div style="background-color: #ef4444; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><i class="fas fa-map-pin" style="color: white; font-size: 12px;"></i></div>',
-                        className: 'custom-div-icon',
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
-                    })
-                }).addTo(map);
-                
+            if (lat && lng && !isNaN(parseFloat(lat)) && !isNaN(parseFloat(lng))) {
+                updateMarker(lat, lng);
                 map.setView([lat, lng], 15);
             }
         }
 
-        // Update marker when coordinates change
+        // Update marker on map
+        function updateMarker(lat, lng) {
+            // Remove existing marker
+            if (currentMarker) {
+                map.removeLayer(currentMarker);
+            }
+            
+            // Add new marker
+            currentMarker = L.marker([lat, lng], {
+                icon: L.divIcon({
+                    html: '<div style="background-color: #ef4444; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><i class="fas fa-map-pin" style="color: white; font-size: 12px;"></i></div>',
+                    className: 'custom-div-icon',
+                    iconSize: [30, 30],
+                    iconAnchor: [15, 15]
+                })
+            }).addTo(map);
+        }
+
+        // Update marker when coordinates change manually
         function updateMarkerFromInput() {
             const lat = parseFloat(document.getElementById('locationLat').value);
             const lng = parseFloat(document.getElementById('locationLng').value);
             
             if (!isNaN(lat) && !isNaN(lng)) {
-                // Remove existing marker
-                if (currentMarker) {
-                    map.removeLayer(currentMarker);
-                }
-                
-                // Add new marker
-                currentMarker = L.marker([lat, lng], {
-                    icon: L.divIcon({
-                        html: '<div style="background-color: #ef4444; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><i class="fas fa-map-pin" style="color: white; font-size: 12px;"></i></div>',
-                        className: 'custom-div-icon',
-                        iconSize: [30, 30],
-                        iconAnchor: [15, 15]
-                    })
-                }).addTo(map);
-                
+                updateMarker(lat, lng);
                 map.setView([lat, lng], 15);
+                showNotification('Marker diperbarui dari input koordinat!', 'info');
             }
         }
 
@@ -450,17 +440,17 @@
             // Drag and drop events
             dragDropArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
-                dragDropArea.classList.add('dragover');
+                dragDropArea.classList.add('border-sky-400', 'bg-sky-50');
             });
 
             dragDropArea.addEventListener('dragleave', function(e) {
                 e.preventDefault();
-                dragDropArea.classList.remove('dragover');
+                dragDropArea.classList.remove('border-sky-400', 'bg-sky-50');
             });
 
             dragDropArea.addEventListener('drop', function(e) {
                 e.preventDefault();
-                dragDropArea.classList.remove('dragover');
+                dragDropArea.classList.remove('border-sky-400', 'bg-sky-50');
                 
                 const files = e.dataTransfer.files;
                 if (files.length > 0) {
@@ -479,13 +469,22 @@
 
         function handleImagePreview(file) {
             if (file && file.type.startsWith('image/')) {
+                // Check file size (2MB limit)
+                if (file.size > 2048000) {
+                    showNotification('Ukuran file terlalu besar! Maksimal 2MB.', 'error');
+                    return;
+                }
+                
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     document.getElementById('previewImg').src = e.target.result;
                     document.getElementById('dropText').classList.add('hidden');
                     document.getElementById('imagePreview').classList.remove('hidden');
+                    showNotification('Foto berhasil dipilih!', 'success');
                 };
                 reader.readAsDataURL(file);
+            } else {
+                showNotification('Format file tidak didukung! Gunakan JPG, PNG, atau GIF.', 'error');
             }
         }
 
@@ -494,6 +493,7 @@
             document.getElementById('dropText').classList.remove('hidden');
             document.getElementById('imagePreview').classList.add('hidden');
             document.getElementById('previewImg').src = '';
+            showNotification('Foto dihapus!', 'info');
         }
 
         // Notification system
@@ -507,6 +507,9 @@
             } else if (type === 'error') {
                 notification.classList.add('bg-red-500');
                 notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+            } else if (type === 'warning') {
+                notification.classList.add('bg-yellow-500');
+                notification.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
             } else {
                 notification.classList.add('bg-blue-500');
                 notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i>${message}`;
@@ -523,23 +526,74 @@
             setTimeout(() => {
                 notification.classList.add('translate-x-full');
                 setTimeout(() => {
-                    document.body.removeChild(notification);
+                    if (document.body.contains(notification)) {
+                        document.body.removeChild(notification);
+                    }
                 }, 300);
             }, 3000);
         }
 
-        // Mobile menu functionality
-        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-        const sidebar = document.getElementById('sidebar');
-
-        mobileMenuBtn.addEventListener('click', function() {
-            sidebar.classList.toggle('open');
-        });
+        // Form validation
+        function validateForm() {
+            const name = document.getElementById('locationName').value.trim();
+            const type = document.getElementById('locationType').value;
+            const lat = document.getElementById('locationLat').value;
+            const lng = document.getElementById('locationLng').value;
+            const status = document.getElementById('locationStatus').value;
+            
+            if (!name) {
+                showNotification('Nama lokasi harus diisi!', 'error');
+                return false;
+            }
+            
+            if (!type) {
+                showNotification('Jenis infrastruktur harus dipilih!', 'error');
+                return false;
+            }
+            
+            if (!lat || !lng) {
+                showNotification('Koordinat harus diisi! Klik pada peta atau isi manual.', 'error');
+                return false;
+            }
+            
+            if (isNaN(parseFloat(lat)) || isNaN(parseFloat(lng))) {
+                showNotification('Koordinat harus berupa angka yang valid!', 'error');
+                return false;
+            }
+            
+            if (!status) {
+                showNotification('Status harus dipilih!', 'error');
+                return false;
+            }
+            
+            return true;
+        }
 
         // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            initMap();
-            setupImageUpload();
+            // Wait a bit for the layout to be ready
+            setTimeout(() => {
+                initMap();
+                setupImageUpload();
+                
+                // Add form validation
+                document.getElementById('locationForm').addEventListener('submit', function(e) {
+                    if (!validateForm()) {
+                        e.preventDefault();
+                    }
+                });
+                
+                console.log('Map and form initialized successfully');
+            }, 100);
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', function() {
+            if (map) {
+                setTimeout(() => {
+                    map.invalidateSize();
+                }, 100);
+            }
         });
     </script>
 </body>

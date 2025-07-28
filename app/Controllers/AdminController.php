@@ -107,7 +107,8 @@ class AdminController extends Controller
 
         $data = [
             'title' => 'Manajemen Peta - GIS Admin Portal',
-            'current_page' => 'maps'
+            'current_page' => 'maps',
+            'include_leaflet' => true // ✅ Tambahkan ini untuk memuat Leaflet
         ];
 
         return view('admin/maps', $data);
@@ -418,7 +419,8 @@ class AdminController extends Controller
 
         $data = [
             'title' => 'Tambah Lokasi - GIS Admin Portal',
-            'current_page' => 'maps'
+            'current_page' => 'maps-add',
+            'include_leaflet' => true // ✅ Tambahkan ini
         ];
 
         return view('admin/maps/add', $data);
@@ -491,8 +493,9 @@ class AdminController extends Controller
 
         $data = [
             'title' => 'Edit Lokasi - GIS Admin Portal',
-            'current_page' => 'maps',
-            'location' => $location
+            'current_page' => 'maps-edit',
+            'location' => $location,
+            'include_leaflet' => true // ✅ Tambahkan ini
         ];
 
         return view('admin/maps/edit', $data);
@@ -577,7 +580,7 @@ class AdminController extends Controller
 
         $data = [
             'title' => 'Daftar Lokasi - GIS Admin Portal',
-            'current_page' => 'maps'
+            'current_page' => 'maps-list'
         ];
 
         return view('admin/maps/list', $data);
