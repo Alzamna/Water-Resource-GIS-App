@@ -6,17 +6,14 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
-// ✅ Redirect root ke login
 $routes->get('/', function () {
     return redirect()->to('/login');
 });
 
-// ✅ Route login/logout (tanpa filter)
 $routes->get('login', 'AdminController::login');
 $routes->post('login', 'AdminController::loginPost');
 $routes->get('logout', 'AdminController::logout');
 
-// ✅ Route admin dengan filter autentikasi
 $routes->group('admin', ['filter' => 'authadmin'], function ($routes) {
     // Dashboard
     $routes->get('/', 'AdminController::dashboard');
@@ -56,8 +53,6 @@ $routes->group('admin', ['filter' => 'authadmin'], function ($routes) {
     $routes->get('profile', 'AdminController::profile');
 });
 
-// ✅ Route untuk peta publik (jika diperlukan)
 $routes->match(['get', 'post'], 'peta', 'PetaController::index');
 
-// ✅ Route alternatif untuk logout
 $routes->get('auth/logout', 'AdminController::logout');
