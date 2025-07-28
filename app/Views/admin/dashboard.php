@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard CMS - GIS Admin Portal</title>
+    <title>Dashboard - GIS Admin Portal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
 
@@ -371,12 +371,6 @@
                             <span>Dashboard</span>
                         </a>
                         
-                        <a href="<?= base_url('admin/konten') ?>" 
-                           class="sidebar-item flex items-center px-4 py-3 text-white rounded-lg <?= ($current_page ?? '') === 'konten' ? 'active' : '' ?>">
-                            <i class="fas fa-file-text w-5 h-5 mr-3"></i>
-                            <span>Manajemen Konten</span>
-                        </a>
-                        
                         <a href="<?= base_url('admin/users') ?>" 
                            class="sidebar-item flex items-center px-4 py-3 text-white rounded-lg <?= ($current_page ?? '') === 'users' ? 'active' : '' ?>">
                             <i class="fas fa-users w-5 h-5 mr-3"></i>
@@ -475,10 +469,6 @@
                 <!-- Total Content -->
                 <div class="bg-white rounded-xl shadow-lg p-6 border border-white/50">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <p class="text-slate-600 text-sm mb-1">Total Konten</p>
-                            <p class="text-2xl font-bold text-slate-800">245</p>
-                        </div>
                         <div class="bg-sky-100 p-3 rounded-lg">
                             <i class="fas fa-file-text text-sky-600 text-xl"></i>
                         </div>
@@ -552,10 +542,6 @@
                     <div class="flex items-center p-4 bg-slate-50 rounded-lg">
                         <div class="bg-sky-100 p-2 rounded-lg mr-4">
                             <i class="fas fa-plus text-sky-600"></i>
-                        </div>
-                        <div class="flex-1">
-                            <p class="font-medium text-slate-800">Konten baru ditambahkan</p>
-                            <p class="text-sm text-slate-600">2 menit yang lalu</p>
                         </div>
                     </div>
                     

@@ -19,10 +19,6 @@ $routes->group('admin', ['filter' => 'authadmin'], function ($routes) {
     $routes->get('/', 'AdminController::dashboard');
     $routes->get('dashboard', 'AdminController::dashboard');
     
-    // Manajemen Konten
-    $routes->get('konten', 'AdminController::konten');
-    $routes->post('konten', 'AdminController::kontenPost');
-    
     // Manajemen User
     $routes->get('users', 'AdminController::users');
     
