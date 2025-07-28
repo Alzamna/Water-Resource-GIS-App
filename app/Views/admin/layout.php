@@ -219,12 +219,23 @@
             padding: 16px;
             background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
         }
+       
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;  
+            scrollbar-width: none;    
+        }
+        .sidebar-dropdown.open {
+            max-height: 500px; 
+            opacity: 1;
+            overflow: hidden; 
+        }
         
-        /* Custom styles for specific pages */
         <?= $custom_styles ?? '' ?>
     </style>
     
-    <!-- Additional head content -->
     <?= $additional_head ?? '' ?>
 </head>
 <body class="animated-bg min-h-screen">
@@ -241,8 +252,36 @@
                 <p class="text-sky-100 text-sm">GIS Admin Portal</p>
             </div>
 
+            <!-- User Section (Moved here) -->
+            <div class="px-4 pt-4 pb-2">
+                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
+                    <div class="flex items-center mb-3">
+                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3">
+                            <i class="fas fa-user text-white"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-white font-medium text-sm truncate"><?= session()->get('admin_name') ?? 'Admin User' ?></p>
+                            <p class="text-sky-100 text-xs">Administrator</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <a href="<?= base_url('admin/profile') ?>" 
+                        class="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 px-3 rounded text-center text-xs transition-all duration-200">
+                            <i class="fas fa-user-circle mr-1"></i>
+                            Profil
+                        </a>
+                        <a href="<?= base_url('logout') ?>" 
+                        class="flex-1 bg-red-500/80 hover:bg-red-600 text-white py-2 px-3 rounded text-center text-xs transition-all duration-200">
+                            <i class="fas fa-sign-out-alt mr-1"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+
             <!-- Navigation Menu -->
-            <div class="flex-1 overflow-y-auto py-4">
+            <div class="flex-1 overflow-y-auto py-4 hide-scrollbar ">
                 <nav class="px-4 space-y-1">
                     <!-- Main Navigation -->
                     <div class="sidebar-section">
@@ -317,32 +356,6 @@
                 </nav>
             </div>
 
-            <!-- User Section -->
-            <div class="user-section">
-                <div class="bg-white/10 backdrop-blur-sm rounded-lg p-4">
-                    <div class="flex items-center mb-3">
-                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center mr-3">
-                            <i class="fas fa-user text-white"></i>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-white font-medium text-sm truncate"><?= session()->get('admin_name') ?? 'Admin User' ?></p>
-                            <p class="text-sky-100 text-xs">Administrator</p>
-                        </div>
-                    </div>
-                    <div class="flex space-x-2">
-                        <a href="<?= base_url('admin/profile') ?>" 
-                           class="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 px-3 rounded text-center text-xs transition-all duration-200">
-                            <i class="fas fa-user-circle mr-1"></i>
-                            Profil
-                        </a>
-                        <a href="<?= base_url('logout') ?>" 
-                           class="flex-1 bg-red-500/80 hover:bg-red-600 text-white py-2 px-3 rounded text-center text-xs transition-all duration-200">
-                            <i class="fas fa-sign-out-alt mr-1"></i>
-                            Logout
-                        </a>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
