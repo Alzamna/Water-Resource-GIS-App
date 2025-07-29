@@ -1,399 +1,451 @@
 <?= $this->extend('admin/layout') ?>
 
 <?= $this->section('content') ?>
+
 <!-- Header -->
-<div class="mb-6">
+<div class="mb-8">
     <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/50">
-        <div class="flex items-center justify-between flex-wrap gap-4">
+        <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-3xl font-bold bg-gradient-to-r from-sky-700 to-sky-600 bg-clip-text text-transparent mb-2">
                     <i class="fas fa-edit mr-2 text-sky-600"></i>
-                    Edit Lokasi: <?= esc($location['name']) ?>
+                    Edit Kategori
                 </h1>
-                <p class="text-slate-600">Perbarui informasi lokasi infrastruktur sumber daya air</p>
+                <p class="text-slate-600">Perbarui informasi kategori</p>
             </div>
-            <div class="flex space-x-3">
-                <a href="<?= base_url('admin/maps') ?>" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors">
+            <div>
+                <a href="<?= base_url('admin/categories') ?>" 
+                   class="bg-slate-100 text-slate-700 px-6 py-3 rounded-lg hover:bg-slate-200 transition-colors">
                     <i class="fas fa-arrow-left mr-2"></i>
-                    Kembali ke Peta
-                </a>
-                <a href="<?= base_url('admin/maps/list') ?>" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-list mr-2"></i>
-                    Daftar Lokasi
+                    Kembali
                 </a>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Form and Map Container -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+<!-- Loading State -->
+<div id="loading-state" class="bg-white rounded-2xl shadow-xl p-12 text-center border border-white/50">
+    <i class="fas fa-spinner fa-spin text-4xl text-sky-600 mb-4"></i>
+    <p class="text-slate-600">Memuat data kategori...</p>
+</div>
+
+<!-- Form -->
+<div id="form-container" class="bg-white rounded-2xl shadow-xl border border-white/50 hidden">
+    <div class="p-6 border-b border-slate-200">
+        <h2 class="text-xl font-bold text-slate-800">
+            <i class="fas fa-edit mr-2 text-sky-600"></i>
+            Informasi Kategori
+        </h2>
+    </div>
     
-    <!-- Form Section -->
-    <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/50">
-        <div class="flex items-center mb-6">
-            <h2 class="text-xl font-bold text-slate-800">
-                <i class="fas fa-edit mr-2 text-sky-600"></i>
-                Form Edit Lokasi
-            </h2>
-        </div>
+    <form id="category-form" class="p-6">
+        <input type="hidden" id="category-id" name="id">
         
-        <form action="<?= base_url('admin/maps/edit/' . $location['id']) ?>" method="POST" enctype="multipart/form-data" id="locationForm">
-            <?= csrf_field() ?>
-            
-            <div class="space-y-4">
-                <!-- Nama Lokasi -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- Left Column -->
+            <div class="space-y-6">
+                <!-- Name -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        <i class="fas fa-tag mr-1 text-sky-600"></i>
-                        Nama Lokasi *
+                    <label for="name" class="block text-sm font-medium text-slate-700 mb-2">
+                        Nama Kategori <span class="text-red-500">*</span>
                     </label>
-                    <input type="text" name="name" id="locationName" required 
-                           value="<?= old('name', $location['name']) ?>"
-                           class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                           placeholder="Masukkan nama lokasi">
+                    <input type="text" 
+                           id="name" 
+                           name="name" 
+                           required
+                           class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
+                           placeholder="Masukkan nama kategori">
+                    <div id="name-error" class="text-red-500 text-sm mt-1 hidden"></div>
                 </div>
                 
-                <!-- Jenis Infrastruktur -->
+                <!-- Description -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        <i class="fas fa-layer-group mr-1 text-sky-600"></i>
-                        Jenis Infrastruktur *
+                    <label for="description" class="block text-sm font-medium text-slate-700 mb-2">
+                        Deskripsi
                     </label>
-                    <select name="type" id="locationType" required 
-                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                        <option value="">Pilih Jenis</option>
-                        <option value="deep-well" <?= old('type', $location['type']) === 'deep-well' ? 'selected' : '' ?>>Sumur Pompa Dalam</option>
-                        <option value="reservoir" <?= old('type', $location['type']) === 'reservoir' ? 'selected' : '' ?>>Sumur Reservoir</option>
-                        <option value="drainage" <?= old('type', $location['type']) === 'drainage' ? 'selected' : '' ?>>Saluran Pembuang</option>
-                        <option value="irrigation" <?= old('type', $location['type']) === 'irrigation' ? 'selected' : '' ?>>Jaringan Irigasi</option>
-                        <option value="other" <?= old('type', $location['type']) === 'other' ? 'selected' : '' ?>>Lainnya</option>
-                    </select>
-                </div>
-                
-                <!-- Koordinat -->
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">
-                            <i class="fas fa-map-pin mr-1 text-sky-600"></i>
-                            Latitude *
-                        </label>
-                        <input type="number" name="latitude" id="locationLat" step="any" required 
-                               value="<?= old('latitude', $location['latitude']) ?>"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                               placeholder="-6.2088">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-2">
-                            <i class="fas fa-map-pin mr-1 text-sky-600"></i>
-                            Longitude *
-                        </label>
-                        <input type="number" name="longitude" id="locationLng" step="any" required 
-                               value="<?= old('longitude', $location['longitude']) ?>"
-                               class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                               placeholder="106.8456">
-                    </div>
+                    <textarea id="description" 
+                              name="description" 
+                              rows="4"
+                              class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors resize-none"
+                              placeholder="Masukkan deskripsi kategori (opsional)"></textarea>
+                    <div id="description-error" class="text-red-500 text-sm mt-1 hidden"></div>
                 </div>
                 
                 <!-- Status -->
                 <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        <i class="fas fa-info-circle mr-1 text-sky-600"></i>
-                        Status *
+                    <label for="is_active" class="block text-sm font-medium text-slate-700 mb-2">
+                        Status
                     </label>
-                    <select name="status" id="locationStatus" required 
-                            class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                        <option value="active" <?= old('status', $location['status']) === 'active' ? 'selected' : '' ?>>Aktif</option>
-                        <option value="maintenance" <?= old('status', $location['status']) === 'maintenance' ? 'selected' : '' ?>>Maintenance</option>
-                        <option value="inactive" <?= old('status', $location['status']) === 'inactive' ? 'selected' : '' ?>>Tidak Aktif</option>
+                    <select id="is_active" 
+                            name="is_active"
+                            class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors">
+                        <option value="1">Aktif</option>
+                        <option value="0">Tidak Aktif</option>
                     </select>
                 </div>
+            </div>
+            
+            <!-- Right Column -->
+            <div class="space-y-6">
+                <!-- Color Picker -->
+                <div>
+                    <label for="color" class="block text-sm font-medium text-slate-700 mb-2">
+                        Warna Kategori
+                    </label>
+                    <div class="flex items-center space-x-4">
+                        <input type="color" 
+                               id="color" 
+                               name="color" 
+                               value="#3B82F6"
+                               class="w-16 h-12 border border-slate-300 rounded-lg cursor-pointer">
+                        <input type="text" 
+                               id="color-hex" 
+                               value="#3B82F6"
+                               class="flex-1 px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
+                               placeholder="#000000">
+                    </div>
+                    <div id="color-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
                 
-                <!-- Deskripsi -->
+                <!-- Icon Selector -->
+                <div>
+                    <label for="icon" class="block text-sm font-medium text-slate-700 mb-2">
+                        Icon Kategori
+                    </label>
+                    <div class="grid grid-cols-6 gap-3 mb-4" id="icon-grid">
+                        <!-- Icons will be populated by JavaScript -->
+                    </div>
+                    <input type="text" 
+                           id="icon" 
+                           name="icon" 
+                           value="fas fa-tag"
+                           class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-sky-500 transition-colors"
+                           placeholder="fas fa-tag">
+                    <div id="icon-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+                
+                <!-- Preview -->
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-2">
-                        <i class="fas fa-align-left mr-1 text-sky-600"></i>
-                        Deskripsi
+                        Preview
                     </label>
-                    <textarea name="description" id="locationDescription" rows="4" 
-                              class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent" 
-                              placeholder="Deskripsi detail lokasi..."><?= old('description', $location['description']) ?></textarea>
-                </div>
-                
-                <!-- Upload Foto -->
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 mb-2">
-                        <i class="fas fa-image mr-1 text-sky-600"></i>
-                        Foto Lokasi (Opsional)
-                    </label>
-                    
-                    <?php if (!empty($location['photo'])): ?>
-                    <div class="mb-4 p-4 bg-slate-50 rounded-lg border border-slate-200">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-slate-700">Foto Saat Ini:</span>
-                            <label class="flex items-center">
-                                <input type="checkbox" name="remove_photo" value="1" class="mr-2">
-                                <span class="text-sm text-red-600">Hapus foto</span>
-                            </label>
-                        </div>
-                        <img src="<?= base_url('admin/maps/photo/' . $location['photo']) ?>" 
-                             alt="Current photo" 
-                             class="w-full max-w-xs h-32 object-cover rounded-lg">
-                    </div>
-                    <?php endif; ?>
-                    
-                    <div class="drag-drop-area" id="dragDropArea">
-                        <input type="file" name="photo" id="locationPhoto" accept="image/*" class="hidden">
-                        <div id="dropText">
-                            <i class="fas fa-cloud-upload-alt text-3xl text-slate-400 mb-2"></i>
-                            <p class="text-slate-600">Drag & drop foto atau <span class="text-sky-600 cursor-pointer" onclick="document.getElementById('locationPhoto').click()">klik untuk pilih</span></p>
-                            <p class="text-xs text-slate-500 mt-1">Format: JPG, PNG, GIF (Max: 2MB)</p>
-                        </div>
-                        <div id="imagePreview" class="hidden">
-                            <img id="previewImg" class="image-preview mx-auto mb-2">
-                            <button type="button" onclick="removeImage()" class="text-red-600 text-sm hover:text-red-800">
-                                <i class="fas fa-trash mr-1"></i>
-                                Hapus Foto Baru
-                            </button>
+                    <div class="bg-slate-50 rounded-lg p-6 border border-slate-200">
+                        <div class="flex items-center">
+                            <div id="preview-icon" class="w-12 h-12 rounded-lg flex items-center justify-center mr-4" style="background-color: #3B82F620; color: #3B82F6;">
+                                <i class="fas fa-tag text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 id="preview-name" class="font-bold text-slate-800 text-lg">Nama Kategori</h3>
+                                <p id="preview-description" class="text-slate-600 text-sm">Deskripsi kategori akan muncul di sini</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="flex space-x-3 mt-6 pt-4 border-t border-slate-200">
-                <a href="<?= base_url('admin/maps') ?>" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors text-center">
-                    <i class="fas fa-times mr-2"></i>
-                    Batal
-                </a>
-                <button type="submit" class="flex-1 px-4 py-2 bg-gradient-to-r from-sky-500 to-sky-600 text-white rounded-lg hover:from-sky-600 hover:to-sky-700 transition-all duration-200">
-                    <i class="fas fa-save mr-2"></i>
-                    Perbarui Lokasi
-                </button>
-            </div>
-        </form>
-    </div>
-
-    <!-- Map and Info Section -->
-    <div class="space-y-6">
-        <!-- Map Section -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/50">
-            <div class="flex items-center justify-between mb-4">
-                <h2 class="text-xl font-bold text-slate-800">
-                    <i class="fas fa-map mr-2 text-sky-600"></i>
-                    Lokasi di Peta
-                </h2>
-                <div class="text-sm text-slate-500">
-                    <i class="fas fa-mouse-pointer mr-1"></i>
-                    Klik untuk mengubah koordinat
-                </div>
-            </div>
-            
-            <div id="map" style="height: 300px; border-radius: 12px;"></div>
-            
-            <!-- Map Tips -->
-            <div class="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <h3 class="text-sm font-semibold text-blue-800 mb-2">
-                    <i class="fas fa-lightbulb mr-1"></i>
-                    Tips Penggunaan Peta:
-                </h3>
-                <ul class="text-xs text-blue-700 space-y-1">
-                    <li>• Klik pada peta untuk mengubah koordinat</li>
-                    <li>• Marker merah menunjukkan lokasi saat ini</li>
-                    <li>• Gunakan scroll mouse untuk zoom in/out</li>
-                </ul>
             </div>
         </div>
         
-        <!-- Info Panel -->
-        <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/50">
-            <h2 class="text-xl font-bold text-slate-800 mb-4">
-                <i class="fas fa-info-circle mr-2 text-sky-600"></i>
-                Informasi Lokasi
-            </h2>
-            
-            <div class="space-y-3">
-                <div class="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span class="text-sm font-medium text-slate-600">ID Lokasi:</span>
-                    <span class="text-sm text-slate-800">#<?= $location['id'] ?></span>
-                </div>
-                
-                <div class="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span class="text-sm font-medium text-slate-600">Dibuat:</span>
-                    <span class="text-sm text-slate-800"><?= date('d/m/Y H:i', strtotime($location['created_at'])) ?></span>
-                </div>
-                
-                <div class="flex justify-between items-center py-2 border-b border-slate-100">
-                    <span class="text-sm font-medium text-slate-600">Terakhir Diperbarui:</span>
-                    <span class="text-sm text-slate-800"><?= date('d/m/Y H:i', strtotime($location['updated_at'])) ?></span>
-                </div>
-                
-                <div class="flex justify-between items-center py-2">
-                    <span class="text-sm font-medium text-slate-600">Status Saat Ini:</span>
-                    <span class="px-2 py-1 rounded text-xs font-medium
-                        <?php if ($location['status'] === 'active'): ?>
-                            bg-green-100 text-green-800
-                        <?php elseif ($location['status'] === 'maintenance'): ?>
-                            bg-yellow-100 text-yellow-800
-                        <?php else: ?>
-                            bg-red-100 text-red-800
-                        <?php endif; ?>">
-                        <?php
-                        $statusLabels = [
-                            'active' => 'Aktif',
-                            'maintenance' => 'Maintenance',
-                            'inactive' => 'Tidak Aktif'
-                        ];
-                        echo $statusLabels[$location['status']] ?? $location['status'];
-                        ?>
-                    </span>
-                </div>
-            </div>
+        <!-- Submit Buttons -->
+        <div class="flex items-center justify-end space-x-4 mt-8 pt-6 border-t border-slate-200">
+            <a href="<?= base_url('admin/categories') ?>" 
+               class="px-6 py-3 bg-slate-100 text-slate-700 rounded-lg hover:bg-slate-200 transition-colors">
+                <i class="fas fa-times mr-2"></i>
+                Batal
+            </a>
+            <button type="submit" 
+                    id="submit-btn"
+                    class="px-6 py-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 hover:scale-105">
+                <i class="fas fa-save mr-2"></i>
+                Perbarui Kategori
+            </button>
         </div>
-    </div>
+    </form>
 </div>
+
+<!-- Error State -->
+<div id="error-state" class="bg-white rounded-2xl shadow-xl p-12 text-center border border-white/50 hidden">
+    <i class="fas fa-exclamation-triangle text-6xl text-red-300 mb-4"></i>
+    <h3 class="text-xl font-semibold text-red-600 mb-2">Gagal memuat data</h3>
+    <p class="text-red-500 mb-6">Kategori tidak ditemukan atau terjadi kesalahan.</p>
+    <a href="<?= base_url('admin/categories') ?>" 
+       class="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 transition-colors">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Kembali ke Daftar
+    </a>
+</div>
+
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
-    let map;
-    let currentMarker = null;
+// Available icons
+const availableIcons = [
+    'fas fa-tag', 'fas fa-tint', 'fas fa-water', 'fas fa-road', 'fas fa-seedling',
+    'fas fa-circle', 'fas fa-square', 'fas fa-star', 'fas fa-heart', 'fas fa-home',
+    'fas fa-building', 'fas fa-tree', 'fas fa-leaf', 'fas fa-mountain', 'fas fa-sun',
+    'fas fa-cloud', 'fas fa-bolt', 'fas fa-fire', 'fas fa-snowflake', 'fas fa-umbrella',
+    'fas fa-map-marker-alt', 'fas fa-compass', 'fas fa-globe', 'fas fa-location-arrow'
+];
 
-    // Initialize map
-    function initMap() {
-        const lat = <?= $location['latitude'] ?>;
-        const lng = <?= $location['longitude'] ?>;
-        
-        map = L.map('map').setView([lat, lng], 15);
-        
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+let categoryId = null;
 
-        // Add initial marker
-        currentMarker = L.marker([lat, lng], {
-            icon: L.divIcon({
-                html: '<div style="background-color: #ef4444; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><i class="fas fa-map-pin" style="color: white; font-size: 12px;"></i></div>',
-                className: 'custom-div-icon',
-                iconSize: [30, 30],
-                iconAnchor: [15, 15]
-            })
-        }).addTo(map);
-
-        // Add click event to map for updating location
-        map.on('click', function(e) {
-            const newLat = e.latlng.lat.toFixed(6);
-            const newLng = e.latlng.lng.toFixed(6);
-            
-            // Update form inputs
-            document.getElementById('locationLat').value = newLat;
-            document.getElementById('locationLng').value = newLng;
-            
-            // Remove existing marker
-            if (currentMarker) {
-                map.removeLayer(currentMarker);
-            }
-            
-            // Add new marker
-            currentMarker = L.marker([newLat, newLng], {
-                icon: L.divIcon({
-                    html: '<div style="background-color: #ef4444; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><i class="fas fa-map-pin" style="color: white; font-size: 12px;"></i></div>',
-                    className: 'custom-div-icon',
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                })
-            }).addTo(map);
-            
-            showNotification('Koordinat berhasil diperbarui dari peta!', 'success');
-        });
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    // Get category ID from URL
+    const pathParts = window.location.pathname.split('/');
+    categoryId = pathParts[pathParts.length - 1];
+    
+    if (categoryId) {
+        loadCategory();
+    } else {
+        showError();
     }
+});
 
-    // Update marker when coordinates change
-    function updateMarkerFromInput() {
-        const lat = parseFloat(document.getElementById('locationLat').value);
-        const lng = parseFloat(document.getElementById('locationLng').value);
+// Load category data
+async function loadCategory() {
+    try {
+        const response = await fetch(`<?= base_url('admin/api/categories') ?>/${categoryId}`);
+        const data = await response.json();
         
-        if (!isNaN(lat) && !isNaN(lng)) {
-            // Remove existing marker
-            if (currentMarker) {
-                map.removeLayer(currentMarker);
-            }
-            
-            // Add new marker
-            currentMarker = L.marker([lat, lng], {
-                icon: L.divIcon({
-                    html: '<div style="background-color: #ef4444; width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"><i class="fas fa-map-pin" style="color: white; font-size: 12px;"></i></div>',
-                    className: 'custom-div-icon',
-                    iconSize: [30, 30],
-                    iconAnchor: [15, 15]
-                })
-            }).addTo(map);
-            
-            map.setView([lat, lng], 15);
+        if (data.success) {
+            populateForm(data.category);
+            initializeComponents();
+            showForm();
+        } else {
+            showError();
         }
+    } catch (error) {
+        console.error('Error loading category:', error);
+        showError();
     }
+}
 
-    // Image upload handling
-    function setupImageUpload() {
-        const dragDropArea = document.getElementById('dragDropArea');
-        const fileInput = document.getElementById('locationPhoto');
+// Populate form with category data
+function populateForm(category) {
+    document.getElementById('category-id').value = category.id;
+    document.getElementById('name').value = category.name;
+    document.getElementById('description').value = category.description || '';
+    document.getElementById('is_active').value = category.is_active;
+    document.getElementById('color').value = category.color;
+    document.getElementById('color-hex').value = category.color;
+    document.getElementById('icon').value = category.icon;
+}
 
-        // Drag and drop events
-        dragDropArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            dragDropArea.classList.add('dragover');
-        });
+// Initialize components
+function initializeComponents() {
+    initializeIconGrid();
+    initializeColorPicker();
+    initializePreview();
+    initializeForm();
+    updatePreview();
+}
 
-        dragDropArea.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            dragDropArea.classList.remove('dragover');
-        });
+// Initialize icon grid
+function initializeIconGrid() {
+    const iconGrid = document.getElementById('icon-grid');
+    const currentIcon = document.getElementById('icon').value;
+    
+    iconGrid.innerHTML = availableIcons.map(icon => `
+        <button type="button" 
+                onclick="selectIcon('${icon}')" 
+                class="icon-option w-12 h-12 border border-slate-300 rounded-lg flex items-center justify-center hover:bg-sky-100 hover:border-sky-500 transition-colors ${icon === currentIcon ? 'bg-sky-100 border-sky-500' : ''}">
+            <i class="${icon} text-slate-600"></i>
+        </button>
+    `).join('');
+}
 
-        dragDropArea.addEventListener('drop', function(e) {
-            e.preventDefault();
-            dragDropArea.classList.remove('dragover');
-            
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                fileInput.files = files;
-                handleImagePreview(files[0]);
-            }
-        });
-
-        // File input change
-        fileInput.addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                handleImagePreview(e.target.files[0]);
-            }
-        });
-    }
-
-    function handleImagePreview(file) {
-        if (file && file.type.startsWith('image/')) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                document.getElementById('previewImg').src = e.target.result;
-                document.getElementById('dropText').classList.add('hidden');
-                document.getElementById('imagePreview').classList.remove('hidden');
-            };
-            reader.readAsDataURL(file);
-        }
-    }
-
-    function removeImage() {
-        document.getElementById('locationPhoto').value = '';
-        document.getElementById('dropText').classList.remove('hidden');
-        document.getElementById('imagePreview').classList.add('hidden');
-        document.getElementById('previewImg').src = '';
-    }
-
-    // Add event listeners for coordinate inputs
-    document.getElementById('locationLat').addEventListener('input', updateMarkerFromInput);
-    document.getElementById('locationLng').addEventListener('input', updateMarkerFromInput);
-
-    // Initialize when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        initMap();
-        setupImageUpload();
+// Initialize color picker
+function initializeColorPicker() {
+    const colorPicker = document.getElementById('color');
+    const colorHex = document.getElementById('color-hex');
+    
+    colorPicker.addEventListener('change', function() {
+        colorHex.value = this.value;
+        updatePreview();
     });
+    
+    colorHex.addEventListener('input', function() {
+        if (this.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+            colorPicker.value = this.value;
+            updatePreview();
+        }
+    });
+}
+
+// Initialize preview
+function initializePreview() {
+    const nameInput = document.getElementById('name');
+    const descriptionInput = document.getElementById('description');
+    
+    nameInput.addEventListener('input', updatePreview);
+    descriptionInput.addEventListener('input', updatePreview);
+}
+
+// Select icon
+function selectIcon(iconClass) {
+    // Remove active class from all icons
+    document.querySelectorAll('.icon-option').forEach(btn => {
+        btn.classList.remove('bg-sky-100', 'border-sky-500');
+    });
+    
+    // Add active class to selected icon
+    event.target.closest('.icon-option').classList.add('bg-sky-100', 'border-sky-500');
+    
+    // Update input and preview
+    document.getElementById('icon').value = iconClass;
+    updatePreview();
+}
+
+// Update preview
+function updatePreview() {
+    const name = document.getElementById('name').value || 'Nama Kategori';
+    const description = document.getElementById('description').value || 'Deskripsi kategori akan muncul di sini';
+    const color = document.getElementById('color').value;
+    const icon = document.getElementById('icon').value;
+    
+    document.getElementById('preview-name').textContent = name;
+    document.getElementById('preview-description').textContent = description;
+    
+    const previewIcon = document.getElementById('preview-icon');
+    previewIcon.style.backgroundColor = color + '20';
+    previewIcon.style.color = color;
+    previewIcon.innerHTML = `<i class="${icon} text-xl"></i>`;
+}
+
+// Initialize form
+function initializeForm() {
+    const form = document.getElementById('category-form');
+    
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        // Clear previous errors
+        clearErrors();
+        
+        // Get form data
+        const formData = new FormData(form);
+        const data = Object.fromEntries(formData.entries());
+        
+        // Validate form
+        if (!validateForm(data)) {
+            return;
+        }
+        
+        // Show loading state
+        const submitBtn = document.getElementById('submit-btn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memperbarui...';
+        submitBtn.disabled = true;
+        
+        try {
+            const response = await fetch(`<?= base_url('admin/api/categories') ?>/${categoryId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+            const result = await response.json();
+            
+            if (result.success) {
+                showNotification(result.message, 'success');
+                setTimeout(() => {
+                    window.location.href = '<?= base_url('admin/categories') ?>';
+                }, 1500);
+            } else {
+                if (result.errors) {
+                    displayErrors(result.errors);
+                } else {
+                    showNotification(result.message || 'Gagal memperbarui kategori', 'error');
+                }
+            }
+        } catch (error) {
+            console.error('Error updating category:', error);
+            showNotification('Terjadi kesalahan saat memperbarui kategori', 'error');
+        } finally {
+            // Restore button state
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }
+    });
+}
+
+// Show/hide states
+function showForm() {
+    document.getElementById('loading-state').classList.add('hidden');
+    document.getElementById('form-container').classList.remove('hidden');
+    document.getElementById('error-state').classList.add('hidden');
+}
+
+function showError() {
+    document.getElementById('loading-state').classList.add('hidden');
+    document.getElementById('form-container').classList.add('hidden');
+    document.getElementById('error-state').classList.remove('hidden');
+}
+
+// Validate form
+function validateForm(data) {
+    let isValid = true;
+    
+    // Name validation
+    if (!data.name || data.name.trim().length < 3) {
+        showFieldError('name', 'Nama kategori minimal 3 karakter');
+        isValid = false;
+    }
+    
+    // Color validation
+    if (!data.color.match(/^#[0-9A-Fa-f]{6}$/)) {
+        showFieldError('color', 'Format warna harus berupa hex code (contoh: #FF0000)');
+        isValid = false;
+    }
+    
+    // Icon validation
+    if (!data.icon || data.icon.trim().length === 0) {
+        showFieldError('icon', 'Icon harus dipilih');
+        isValid = false;
+    }
+    
+    return isValid;
+}
+
+// Show field error
+function showFieldError(field, message) {
+    const errorElement = document.getElementById(field + '-error');
+    const inputElement = document.getElementById(field);
+    
+    if (errorElement) {
+        errorElement.textContent = message;
+        errorElement.classList.remove('hidden');
+    }
+    
+    if (inputElement) {
+        inputElement.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+    }
+}
+
+// Clear errors
+function clearErrors() {
+    document.querySelectorAll('[id$="-error"]').forEach(element => {
+        element.classList.add('hidden');
+    });
+    
+    document.querySelectorAll('input, textarea, select').forEach(element => {
+        element.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
+    });
+}
+
+// Display errors
+function displayErrors(errors) {
+    Object.keys(errors).forEach(field => {
+        showFieldError(field, errors[field]);
+    });
+}
+
+// Notification function (placeholder)
+function showNotification(message, type) {
+    console.log(`Notification (${type}): ${message}`);
+}
 </script>
 <?= $this->endSection() ?>

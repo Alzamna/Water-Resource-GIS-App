@@ -10,22 +10,14 @@
                     <i class="fas fa-list mr-2 text-sky-600"></i>
                     Daftar Lokasi Sumber Daya Air
                 </h1>
-                <p class="text-slate-600">Kelola semua lokasi infrastruktur dalam bentuk tabel</p>
+                <p class="text-slate-600">Kelola dan ekspor data lokasi infrastruktur sumber daya air</p>
             </div>
             <div class="flex space-x-3">
                 <a href="<?= base_url('admin/maps') ?>" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2 rounded-lg transition-colors">
                     <i class="fas fa-map mr-2"></i>
                     Lihat Peta
                 </a>
-                <button onclick="exportData('excel')" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-file-excel mr-2"></i>
-                    Export Excel
-                </button>
-                <button onclick="exportData('pdf')" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition-colors">
-                    <i class="fas fa-file-pdf mr-2"></i>
-                    Export PDF
-                </button>
-                <a href="<?= base_url('admin/maps/add') ?>" class="bg-gradient-to-r from-sky-500 to-sky-600 text-white px-6 py-3 rounded-lg hover:from-sky-600 hover:to-sky-700 transition-all duration-200 shadow-lg">
+                <a href="<?= base_url('admin/maps/add') ?>" class="bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white px-4 py-2 rounded-lg transition-all duration-200">
                     <i class="fas fa-plus mr-2"></i>
                     Tambah Lokasi
                 </a>
@@ -34,20 +26,19 @@
     </div>
 </div>
 
-<!-- Filter & Search -->
+<!-- Filters and Search -->
 <div class="bg-white rounded-2xl shadow-xl p-6 border border-white/50 mb-6">
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Cari Lokasi</label>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div class="flex flex-wrap items-center gap-4">
+            <!-- Search -->
             <div class="relative">
-                <input type="text" id="searchInput" placeholder="Nama lokasi..." class="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                <i class="fas fa-search absolute left-3 top-3 text-slate-400"></i>
+                <input type="text" id="searchInput" placeholder="Cari lokasi..." 
+                       class="pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent w-64">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"></i>
             </div>
-        </div>
-        
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Jenis</label>
-            <select id="typeFilter" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+            
+            <!-- Type Filter -->
+            <select id="typeFilter" class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
                 <option value="">Semua Jenis</option>
                 <option value="deep-well">Sumur Pompa Dalam</option>
                 <option value="reservoir">Sumur Reservoir</option>
@@ -55,415 +46,535 @@
                 <option value="irrigation">Jaringan Irigasi</option>
                 <option value="other">Lainnya</option>
             </select>
-        </div>
-        
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Status</label>
-            <select id="statusFilter" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
+            
+            <!-- Status Filter -->
+            <select id="statusFilter" class="px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
                 <option value="">Semua Status</option>
                 <option value="active">Aktif</option>
                 <option value="maintenance">Maintenance</option>
                 <option value="inactive">Tidak Aktif</option>
             </select>
+            
+            <button onclick="resetFilters()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition-colors">
+                <i class="fas fa-undo mr-2"></i>
+                Reset
+            </button>
         </div>
         
-        <div>
-            <label class="block text-sm font-medium text-slate-700 mb-2">Tampilkan</label>
-            <select id="perPageSelect" class="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-sky-500 focus:border-transparent">
-                <option value="10">10 per halaman</option>
-                <option value="25">25 per halaman</option>
-                <option value="50">50 per halaman</option>
-                <option value="100">100 per halaman</option>
-            </select>
+        <!-- Export Buttons -->
+        <div class="flex items-center space-x-2">
+            <button onclick="exportData('excel')" class="px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors">
+                <i class="fas fa-file-excel mr-2"></i>
+                Export Excel
+            </button>
+            <button onclick="exportData('pdf')" class="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg transition-colors">
+                <i class="fas fa-file-pdf mr-2"></i>
+                Export PDF
+            </button>
         </div>
     </div>
 </div>
 
-<!-- Table -->
-<div class="bg-white rounded-2xl shadow-xl border border-white/50">
-    <div class="p-6">
-        <div class="flex items-center justify-between mb-4">
+<!-- Data Table -->
+<div class="bg-white rounded-2xl shadow-xl border border-white/50 overflow-hidden">
+    <div class="p-6 border-b border-slate-200">
+        <div class="flex items-center justify-between">
             <h2 class="text-xl font-bold text-slate-800">
                 <i class="fas fa-table mr-2 text-sky-600"></i>
-                Tabel Lokasi
+                Data Lokasi
             </h2>
             <div class="text-sm text-slate-500">
                 Total: <span id="totalCount">0</span> lokasi
             </div>
         </div>
-        
-        <div class="overflow-x-auto">
-            <table class="w-full">
-                <thead>
-                    <tr class="border-b-2 border-slate-200">
-                        <th class="text-left py-3 px-4 font-semibold text-slate-700">
-                            <button onclick="sortTable('name')" class="flex items-center hover:text-sky-600">
-                                Nama Lokasi
-                                <i class="fas fa-sort ml-1 text-xs"></i>
-                            </button>
-                        </th>
-                        <th class="text-left py-3 px-4 font-semibold text-slate-700">
-                            <button onclick="sortTable('type')" class="flex items-center hover:text-sky-600">
-                                Jenis
-                                <i class="fas fa-sort ml-1 text-xs"></i>
-                            </button>
-                        </th>
-                        <th class="text-left py-3 px-4 font-semibold text-slate-700">Koordinat</th>
-                        <th class="text-left py-3 px-4 font-semibold text-slate-700">
-                            <button onclick="sortTable('status')" class="flex items-center hover:text-sky-600">
-                                Status
-                                <i class="fas fa-sort ml-1 text-xs"></i>
-                            </button>
-                        </th>
-                        <th class="text-left py-3 px-4 font-semibold text-slate-700">
-                            <button onclick="sortTable('created_at')" class="flex items-center hover:text-sky-600">
-                                Dibuat
-                                <i class="fas fa-sort ml-1 text-xs"></i>
-                            </button>
-                        </th>
-                        <th class="text-center py-3 px-4 font-semibold text-slate-700">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="locationTableBody">
-                    <!-- Dynamic content will be loaded here -->
-                </tbody>
-            </table>
+    </div>
+    
+    <div class="overflow-x-auto">
+        <table class="w-full">
+            <thead class="bg-slate-50">
+                <tr>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">No</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Nama Lokasi</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Jenis</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Koordinat</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Tanggal Dibuat</th>
+                    <th class="px-6 py-4 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Aksi</th>
+                </tr>
+            </thead>
+            <tbody id="locationTableBody" class="bg-white divide-y divide-slate-200">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Loading State -->
+    <div id="tableLoading" class="p-12 text-center">
+        <div class="inline-flex items-center space-x-3">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-sky-600"></div>
+            <span class="text-slate-600">Memuat data...</span>
         </div>
-        
-        <!-- Pagination -->
-        <div class="flex items-center justify-between mt-6 pt-4 border-t border-slate-200">
-            <div class="text-sm text-slate-600">
-                Menampilkan <span id="showingStart">0</span> - <span id="showingEnd">0</span> dari <span id="showingTotal">0</span> lokasi
-            </div>
-            <div class="flex space-x-2" id="paginationContainer">
-                <!-- Pagination buttons will be generated here -->
-            </div>
+    </div>
+    
+    <!-- Empty State -->
+    <div id="emptyState" class="p-12 text-center hidden">
+        <div class="text-slate-400 mb-4">
+            <i class="fas fa-inbox text-6xl"></i>
         </div>
+        <h3 class="text-lg font-medium text-slate-900 mb-2">Tidak ada data</h3>
+        <p class="text-slate-500 mb-4">Belum ada lokasi yang ditambahkan atau tidak ada yang sesuai dengan filter.</p>
+        <a href="<?= base_url('admin/maps/add') ?>" class="inline-flex items-center px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white rounded-lg transition-colors">
+            <i class="fas fa-plus mr-2"></i>
+            Tambah Lokasi Pertama
+        </a>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div id="deleteModal" class="modal fixed inset-0 bg-black bg-opacity-50 z-50 items-center justify-center">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4">
-        <div class="p-6">
-            <div class="text-center">
-                <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
-                </div>
-                <h3 class="text-lg font-bold text-slate-800 mb-2">Konfirmasi Hapus</h3>
-                <p class="text-slate-600 mb-6">Apakah Anda yakin ingin menghapus lokasi "<span id="deleteLocationName" class="font-semibold"></span>"?</p>
-                
-                <div class="flex space-x-3">
-                    <button onclick="closeDeleteModal()" class="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
-                        Batal
-                    </button>
-                    <button onclick="confirmDelete()" class="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors">
-                        <i class="fas fa-trash mr-2"></i>
-                        Hapus
-                    </button>
-                </div>
-            </div>
-        </div>
+<!-- Pagination -->
+<div id="pagination" class="mt-6 flex items-center justify-between">
+    <div class="text-sm text-slate-700">
+        Menampilkan <span id="showingStart">0</span> sampai <span id="showingEnd">0</span> dari <span id="showingTotal">0</span> hasil
+    </div>
+    <div class="flex items-center space-x-2" id="paginationButtons">
+        <!-- Pagination buttons will be generated here -->
     </div>
 </div>
 <?= $this->endSection() ?>
 
 <?= $this->section('scripts') ?>
 <script>
-    let locations = [];
-    let filteredLocations = [];
-    let currentPage = 1;
-    let perPage = 10;
-    let sortField = 'name';
-    let sortDirection = 'asc';
-    let deleteLocationId = null;
+let locations = [];
+let filteredLocations = [];
+let currentPage = 1;
+const itemsPerPage = 10;
 
-    // Load locations from server
-    async function loadLocations() {
-        try {
-            const response = await fetch('<?= base_url('admin/maps/get-locations') ?>');
-            locations = await response.json();
-            applyFilters();
-        } catch (error) {
-            console.error('Error loading locations:', error);
+// Type and status labels
+const typeLabels = {
+    'deep-well': 'Sumur Pompa Dalam',
+    'reservoir': 'Sumur Reservoir',
+    'drainage': 'Saluran Pembuang',
+    'irrigation': 'Jaringan Irigasi',
+    'other': 'Lainnya'
+};
+
+const statusLabels = {
+    'active': 'Aktif',
+    'maintenance': 'Maintenance',
+    'inactive': 'Tidak Aktif'
+};
+
+// Load locations from API
+async function loadLocations() {
+    try {
+        showTableLoading(true);
+        
+        const response = await fetch('<?= base_url('admin/api/locations') ?>');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
         }
-    }
-
-    // Apply filters and search
-    function applyFilters() {
-        const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-        const typeFilter = document.getElementById('typeFilter').value;
-        const statusFilter = document.getElementById('statusFilter').value;
-
-        filteredLocations = locations.filter(location => {
-            const matchesSearch = location.name.toLowerCase().includes(searchTerm) || 
-                                (location.description && location.description.toLowerCase().includes(searchTerm));
-            const matchesType = !typeFilter || location.type === typeFilter;
-            const matchesStatus = !statusFilter || location.status === statusFilter;
-            return matchesSearch && matchesType && matchesStatus;
-        });
-
-        sortLocations();
-        updateTable();
-        updatePagination();
-    }
-
-    // Sort locations
-    function sortLocations() {
-        filteredLocations.sort((a, b) => {
-            let aVal = a[sortField];
-            let bVal = b[sortField];
-            
-            if (sortField === 'created_at') {
-                aVal = new Date(aVal);
-                bVal = new Date(bVal);
-            }
-            
-            if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-            if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
-            return 0;
-        });
-    }
-
-    // Sort table
-    function sortTable(field) {
-        if (sortField === field) {
-            sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+        
+        const data = await response.json();
+        console.log('Locations response:', data);
+        
+        if (Array.isArray(data)) {
+            locations = data;
+            filteredLocations = [...locations];
+            renderTable();
+            showNotification('Data lokasi berhasil dimuat!', 'success');
+        } else if (data.success && Array.isArray(data.locations)) {
+            locations = data.locations;
+            filteredLocations = [...locations];
+            renderTable();
+            showNotification('Data lokasi berhasil dimuat!', 'success');
         } else {
-            sortField = field;
-            sortDirection = 'asc';
+            throw new Error(data.message || 'Invalid response format');
         }
-        applyFilters();
+    } catch (error) {
+        console.error('Error loading locations:', error);
+        showNotification('Gagal memuat data lokasi: ' + error.message, 'error');
+        showEmptyState(true);
+    } finally {
+        showTableLoading(false);
     }
+}
 
-    // Update table
-    function updateTable() {
-        const tableBody = document.getElementById('locationTableBody');
-        const start = (currentPage - 1) * perPage;
-        const end = start + perPage;
-        const pageLocations = filteredLocations.slice(start, end);
+// Filter locations
+function filterLocations() {
+    const search = document.getElementById('searchInput').value.toLowerCase();
+    const typeFilter = document.getElementById('typeFilter').value;
+    const statusFilter = document.getElementById('statusFilter').value;
+    
+    filteredLocations = locations.filter(location => {
+        const matchSearch = !search || 
+            location.name.toLowerCase().includes(search) ||
+            (location.description && location.description.toLowerCase().includes(search));
+        
+        const matchType = !typeFilter || location.type === typeFilter;
+        const matchStatus = !statusFilter || location.status === statusFilter;
+        
+        return matchSearch && matchType && matchStatus;
+    });
+    
+    currentPage = 1;
+    renderTable();
+}
 
-        if (pageLocations.length === 0) {
-            tableBody.innerHTML = `
-                <tr>
-                    <td colspan="6" class="text-center py-8 text-slate-500">
-                        <i class="fas fa-map-marked-alt text-3xl mb-2"></i>
-                        <p>Tidak ada lokasi yang ditemukan</p>
-                    </td>
-                </tr>
-            `;
-            return;
-        }
+// Reset filters
+function resetFilters() {
+    document.getElementById('searchInput').value = '';
+    document.getElementById('typeFilter').value = '';
+    document.getElementById('statusFilter').value = '';
+    
+    filteredLocations = [...locations];
+    currentPage = 1;
+    renderTable();
+    
+    showNotification('Filter berhasil direset!', 'info');
+}
 
-        tableBody.innerHTML = pageLocations.map(location => {
-            const statusClass = location.status === 'active' ? 'status-active' : 
-                              location.status === 'maintenance' ? 'status-maintenance' : 'status-inactive';
-            const statusText = location.status === 'active' ? 'Aktif' : 
-                             location.status === 'maintenance' ? 'Maintenance' : 'Tidak Aktif';
-            
-            return `
-                <tr class="table-row border-b border-slate-100">
-                    <td class="py-4 px-4">
-                        <div class="flex items-center space-x-3">
-                            <div class="resource-type-icon type-${location.type}">
-                                <i class="fas fa-${getIconName(location.type)}"></i>
-                            </div>
-                            <div>
-                                <p class="font-medium text-slate-800">${location.name}</p>
-                                <p class="text-sm text-slate-500">${getTypeLabel(location.type)}</p>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="py-4 px-4">
-                        <span class="text-sm text-slate-700">${getTypeLabel(location.type)}</span>
-                    </td>
-                    <td class="py-4 px-4">
-                        <div class="text-sm text-slate-600">
-                            <div>${location.latitude}</div>
-                            <div>${location.longitude}</div>
-                        </div>
-                    </td>
-                    <td class="py-4 px-4">
-                        <span class="status-badge ${statusClass}">${statusText}</span>
-                    </td>
-                    <td class="py-4 px-4">
-                        <span class="text-sm text-slate-600">${formatDate(location.created_at)}</span>
-                    </td>
-                    <td class="py-4 px-4">
-                        <div class="flex space-x-2 justify-center">
-                            <a href="<?= base_url('admin/maps') ?>?focus=${location.id}" class="p-2 text-blue-600 hover:bg-blue-100 rounded transition-colors" title="Lihat di Peta">
-                                <i class="fas fa-map text-sm"></i>
-                            </a>
-                            <a href="<?= base_url('admin/maps/edit') ?>/${location.id}" class="p-2 text-green-600 hover:bg-green-100 rounded transition-colors" title="Edit">
-                                <i class="fas fa-edit text-sm"></i>
-                            </a>
-                            <button onclick="showDeleteModal(${location.id}, '${location.name}')" class="p-2 text-red-600 hover:bg-red-100 rounded transition-colors" title="Hapus">
-                                <i class="fas fa-trash text-sm"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `;
-        }).join('');
-
-        // Update counters
-        document.getElementById('totalCount').textContent = filteredLocations.length;
-        document.getElementById('showingStart').textContent = start + 1;
-        document.getElementById('showingEnd').textContent = Math.min(end, filteredLocations.length);
-        document.getElementById('showingTotal').textContent = filteredLocations.length;
+// Render table
+function renderTable() {
+    const tbody = document.getElementById('locationTableBody');
+    const totalCount = document.getElementById('totalCount');
+    
+    // Update total count
+    totalCount.textContent = filteredLocations.length;
+    
+    // Check if empty
+    if (filteredLocations.length === 0) {
+        showEmptyState(true);
+        return;
+    } else {
+        showEmptyState(false);
     }
-
+    
+    // Calculate pagination
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, filteredLocations.length);
+    const pageData = filteredLocations.slice(startIndex, endIndex);
+    
+    // Render rows
+    tbody.innerHTML = pageData.map((location, index) => {
+        const globalIndex = startIndex + index + 1;
+        return `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">${globalIndex}</td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="flex items-center">
+                        <div class="resource-type-icon type-${location.type} mr-3">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <div>
+                            <div class="text-sm font-medium text-slate-900">${location.name}</div>
+                            ${location.description ? `<div class="text-sm text-slate-500 truncate max-w-xs">${location.description}</div>` : ''}
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                    ${typeLabels[location.type] || location.type}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                    <div class="flex items-center">
+                        <i class="fas fa-map-pin mr-2 text-slate-400"></i>
+                        <span>${parseFloat(location.latitude).toFixed(4)}, ${parseFloat(location.longitude).toFixed(4)}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <span class="status-badge status-${location.status}">
+                        ${statusLabels[location.status] || location.status}
+                    </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-900">
+                    ${formatDate(location.created_at)}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div class="flex items-center space-x-2">
+                        <a href="<?= base_url('admin/maps/edit/') ?>${location.id}" 
+                           class="text-sky-600 hover:text-sky-900 transition-colors">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                        <button onclick="deleteLocation(${location.id})" 
+                                class="text-red-600 hover:text-red-900 transition-colors">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        ${location.photo ? `
+                        <button onclick="viewPhoto('${location.photo}')" 
+                                class="text-green-600 hover:text-green-900 transition-colors">
+                            <i class="fas fa-image"></i>
+                        </button>
+                        ` : ''}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
     // Update pagination
-    function updatePagination() {
-        const totalPages = Math.ceil(filteredLocations.length / perPage);
-        const paginationContainer = document.getElementById('paginationContainer');
-        
-        if (totalPages <= 1) {
-            paginationContainer.innerHTML = '';
-            return;
-        }
+    renderPagination();
+}
 
-        let paginationHTML = '';
-        
-        // Previous button
-        if (currentPage > 1) {
-            paginationHTML += `<button onclick="changePage(${currentPage - 1})" class="px-3 py-1 border border-slate-300 rounded hover:bg-slate-50">
+// Render pagination
+function renderPagination() {
+    const totalPages = Math.ceil(filteredLocations.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage + 1;
+    const endIndex = Math.min(currentPage * itemsPerPage, filteredLocations.length);
+    
+    // Update showing info
+    document.getElementById('showingStart').textContent = startIndex;
+    document.getElementById('showingEnd').textContent = endIndex;
+    document.getElementById('showingTotal').textContent = filteredLocations.length;
+    
+    // Generate pagination buttons
+    const paginationButtons = document.getElementById('paginationButtons');
+    let buttonsHTML = '';
+    
+    // Previous button
+    if (currentPage > 1) {
+        buttonsHTML += `
+            <button onclick="changePage(${currentPage - 1})" 
+                    class="px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
                 <i class="fas fa-chevron-left"></i>
-            </button>`;
-        }
-
-        // Page numbers
-        const startPage = Math.max(1, currentPage - 2);
-        const endPage = Math.min(totalPages, currentPage + 2);
-
-        if (startPage > 1) {
-            paginationHTML += `<button onclick="changePage(1)" class="px-3 py-1 border border-slate-300 rounded hover:bg-slate-50">1</button>`;
-            if (startPage > 2) {
-                paginationHTML += `<span class="px-3 py-1">...</span>`;
-            }
-        }
-
-        for (let i = startPage; i <= endPage; i++) {
-            const isActive = i === currentPage;
-            paginationHTML += `<button onclick="changePage(${i})" class="px-3 py-1 border ${isActive ? 'bg-sky-600 text-white border-sky-600' : 'border-slate-300 hover:bg-slate-50'} rounded">${i}</button>`;
-        }
-
-        if (endPage < totalPages) {
-            if (endPage < totalPages - 1) {
-                paginationHTML += `<span class="px-3 py-1">...</span>`;
-            }
-            paginationHTML += `<button onclick="changePage(${totalPages})" class="px-3 py-1 border border-slate-300 rounded hover:bg-slate-50">${totalPages}</button>`;
-        }
-
-        // Next button
-        if (currentPage < totalPages) {
-            paginationHTML += `<button onclick="changePage(${currentPage + 1})" class="px-3 py-1 border border-slate-300 rounded hover:bg-slate-50">
+            </button>
+        `;
+    }
+    
+    // Page numbers
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
+    if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const isActive = i === currentPage;
+        buttonsHTML += `
+            <button onclick="changePage(${i})" 
+                    class="px-3 py-2 text-sm ${isActive ? 'bg-sky-500 text-white' : 'bg-white text-slate-700 hover:bg-slate-50'} border border-slate-300 rounded-lg transition-colors">
+                ${i}
+            </button>
+        `;
+    }
+    
+    // Next button
+    if (currentPage < totalPages) {
+        buttonsHTML += `
+            <button onclick="changePage(${currentPage + 1})" 
+                    class="px-3 py-2 text-sm bg-white border border-slate-300 rounded-lg hover:bg-slate-50 transition-colors">
                 <i class="fas fa-chevron-right"></i>
-            </button>`;
-        }
-
-        paginationContainer.innerHTML = paginationHTML;
+            </button>
+        `;
     }
+    
+    paginationButtons.innerHTML = buttonsHTML;
+}
 
-    // Change page
-    function changePage(page) {
-        currentPage = page;
-        updateTable();
-        updatePagination();
+// Change page
+function changePage(page) {
+    currentPage = page;
+    renderTable();
+}
+
+// Delete location
+async function deleteLocation(id) {
+    if (!confirm('Apakah Anda yakin ingin menghapus lokasi ini?')) {
+        return;
     }
-
-    // Helper functions
-    function getIconName(type) {
-        const icons = {
-            'deep-well': 'tint',
-            'reservoir': 'database',
-            'drainage': 'stream',
-            'irrigation': 'seedling',
-            'other': 'ellipsis-h'
-        };
-        return icons[type] || 'ellipsis-h';
-    }
-
-    function getTypeLabel(type) {
-        const labels = {
-            'deep-well': 'Sumur Pompa Dalam',
-            'reservoir': 'Sumur Reservoir',
-            'drainage': 'Saluran Pembuang',
-            'irrigation': 'Jaringan Irigasi',
-            'other': 'Lainnya'
-        };
-        return labels[type] || 'Lainnya';
-    }
-
-    function formatDate(dateString) {
-        const date = new Date(dateString);
-        return date.toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: '2-digit',
-            year: 'numeric'
-        });
-    }
-
-    // Delete functions
-    function showDeleteModal(id, name) {
-        deleteLocationId = id;
-        document.getElementById('deleteLocationName').textContent = name;
-        document.getElementById('deleteModal').classList.remove('hidden');
-        document.getElementById('deleteModal').classList.add('flex');
-    }
-
-    function closeDeleteModal() {
-        document.getElementById('deleteModal').classList.add('hidden');
-        document.getElementById('deleteModal').classList.remove('flex');
-        deleteLocationId = null;
-    }
-
-    async function confirmDelete() {
-        if (deleteLocationId) {
-            try {
-                const response = await fetch(`<?= base_url('admin/maps/delete-location') ?>/${deleteLocationId}`, {
-                    method: 'DELETE'
-                });
-                
-                if (response.ok) {
-                    loadLocations();
-                    showNotification('Lokasi berhasil dihapus', 'success');
-                } else {
-                    showNotification('Gagal menghapus lokasi', 'error');
-                }
-            } catch (error) {
-                console.error('Error deleting location:', error);
-                showNotification('Terjadi kesalahan saat menghapus lokasi', 'error');
+    
+    try {
+        const response = await fetch(`<?= base_url('admin/api/locations/') ?>${id}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
             }
-            closeDeleteModal();
-        }
-    }
-
-    // Export functions
-    function exportData(format) {
-        const params = new URLSearchParams({
-            format: format,
-            search: document.getElementById('searchInput').value,
-            type: document.getElementById('typeFilter').value,
-            status: document.getElementById('statusFilter').value
         });
         
-        window.open(`<?= base_url('admin/maps/export') ?>?${params.toString()}`, '_blank');
+        const data = await response.json();
+        
+        if (response.ok && data.success) {
+            showNotification('Lokasi berhasil dihapus!', 'success');
+            loadLocations(); // Reload data
+        } else {
+            throw new Error(data.message || 'Gagal menghapus lokasi');
+        }
+    } catch (error) {
+        console.error('Error deleting location:', error);
+        showNotification('Gagal menghapus lokasi: ' + error.message, 'error');
+    }
+}
+
+// View photo
+function viewPhoto(photoPath) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-lg p-4 max-w-2xl max-h-full overflow-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-semibold">Foto Lokasi</h3>
+                <button onclick="this.closest('.fixed').remove()" class="text-slate-400 hover:text-slate-600">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <img src="<?= base_url('admin/photo/') ?>${photoPath}" alt="Foto lokasi" class="max-w-full h-auto rounded-lg">
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Close on backdrop click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// Export data
+function exportData(format) {
+    const search = document.getElementById('searchInput').value;
+    const type = document.getElementById('typeFilter').value;
+    const status = document.getElementById('statusFilter').value;
+    
+    const params = new URLSearchParams({
+        format: format,
+        search: search,
+        type: type,
+        status: status
+    });
+    
+    const url = `<?= base_url('admin/maps/export') ?>?${params.toString()}`;
+    window.open(url, '_blank');
+    
+    showNotification(`Export ${format.toUpperCase()} dimulai!`, 'info');
+}
+
+// Format date
+function formatDate(dateString) {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('id-ID', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+}
+
+// Show/hide loading
+function showTableLoading(show) {
+    const loading = document.getElementById('tableLoading');
+    const tbody = document.getElementById('locationTableBody');
+    
+    if (show) {
+        loading.classList.remove('hidden');
+        tbody.innerHTML = '';
+    } else {
+        loading.classList.add('hidden');
+    }
+}
+
+// Show/hide empty state
+function showEmptyState(show) {
+    const emptyState = document.getElementById('emptyState');
+    const tbody = document.getElementById('locationTableBody');
+    const pagination = document.getElementById('pagination');
+    
+    if (show) {
+        emptyState.classList.remove('hidden');
+        tbody.innerHTML = '';
+        pagination.classList.add('hidden');
+    } else {
+        emptyState.classList.add('hidden');
+        pagination.classList.remove('hidden');
+    }
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white transition-all duration-300 transform translate-x-full`;
+    
+    if (type === 'success') {
+        notification.classList.add('bg-green-500');
+        notification.innerHTML = `<i class="fas fa-check-circle mr-2"></i>${message}`;
+    } else if (type === 'error') {
+        notification.classList.add('bg-red-500');
+        notification.innerHTML = `<i class="fas fa-exclamation-circle mr-2"></i>${message}`;
+    } else if (type === 'warning') {
+        notification.classList.add('bg-yellow-500');
+        notification.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
+    } else {
+        notification.classList.add('bg-blue-500');
+        notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i>${message}`;
     }
 
-    // Event listeners
-    document.getElementById('searchInput').addEventListener('input', applyFilters);
-    document.getElementById('typeFilter').addEventListener('change', applyFilters);
-    document.getElementById('statusFilter').addEventListener('change', applyFilters);
-    document.getElementById('perPageSelect').addEventListener('change', function() {
-        perPage = parseInt(this.value);
-        currentPage = 1;
-        applyFilters();
-    });
+    document.body.appendChild(notification);
 
-    // Initialize when page loads
-    document.addEventListener('DOMContentLoaded', function() {
-        loadLocations();
-    });
+    // Animate in
+    setTimeout(() => {
+        notification.classList.remove('translate-x-full');
+    }, 100);
+
+    // Animate out and remove
+    setTimeout(() => {
+        notification.classList.add('translate-x-full');
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Initialize when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    loadLocations();
+    
+    // Add event listeners for filters
+    document.getElementById('searchInput').addEventListener('input', filterLocations);
+    document.getElementById('typeFilter').addEventListener('change', filterLocations);
+    document.getElementById('statusFilter').addEventListener('change', filterLocations);
+    
+    console.log('Location list initialized successfully');
+});
 </script>
+
+<style>
+.resource-type-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 14px;
+}
+
+.type-deep-well { background: #3b82f6; }
+.type-reservoir { background: #10b981; }
+.type-drainage { background: #f59e0b; }
+.type-irrigation { background: #8b5cf6; }
+.type-other { background: #6b7280; }
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active { background: #dcfce7; color: #166534; }
+.status-maintenance { background: #fef3c7; color: #92400e; }
+.status-inactive { background: #fee2e2; color: #991b1b; }
+
+#tableLoading.hidden,
+#emptyState.hidden,
+#pagination.hidden {
+    display: none;
+}
+</style>
 <?= $this->endSection() ?>

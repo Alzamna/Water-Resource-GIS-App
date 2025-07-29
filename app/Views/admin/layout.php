@@ -67,8 +67,9 @@
         }
         
         .sidebar-dropdown.open {
-            max-height: 300px;
+            max-height: 500px;
             opacity: 1;
+            overflow: hidden;
         }
         
         .sidebar-dropdown-item {
@@ -219,23 +220,20 @@
             padding: 16px;
             background: linear-gradient(to top, rgba(0,0,0,0.1), transparent);
         }
-       
+        
         .hide-scrollbar::-webkit-scrollbar {
             display: none;
         }
         .hide-scrollbar {
-            -ms-overflow-style: none;  
-            scrollbar-width: none;    
-        }
-        .sidebar-dropdown.open {
-            max-height: 500px; 
-            opacity: 1;
-            overflow: hidden; 
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         
+        /* Custom styles for specific pages */
         <?= $custom_styles ?? '' ?>
     </style>
     
+    <!-- Additional head content -->
     <?= $additional_head ?? '' ?>
 </head>
 <body class="animated-bg min-h-screen">
@@ -265,13 +263,13 @@
                         </div>
                     </div>
                     <div class="flex space-x-2">
-                        <a href="<?= base_url('admin/profile') ?>" 
-                        class="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 px-3 rounded text-center text-xs transition-all duration-200">
+                        <a href="<?= base_url('admin/profile') ?>"
+                           class="flex-1 bg-white/10 hover:bg-white/20 text-white py-2 px-3 rounded text-center text-xs transition-all duration-200">
                             <i class="fas fa-user-circle mr-1"></i>
                             Profil
                         </a>
-                        <a href="<?= base_url('logout') ?>" 
-                        class="flex-1 bg-red-500/80 hover:bg-red-600 text-white py-2 px-3 rounded text-center text-xs transition-all duration-200">
+                        <a href="<?= base_url('logout') ?>"
+                           class="flex-1 bg-red-500/80 hover:bg-red-600 text-white py-2 px-3 rounded text-center text-xs transition-all duration-200">
                             <i class="fas fa-sign-out-alt mr-1"></i>
                             Logout
                         </a>
@@ -279,27 +277,26 @@
                 </div>
             </div>
 
-
             <!-- Navigation Menu -->
-            <div class="flex-1 overflow-y-auto py-4 hide-scrollbar ">
+            <div class="flex-1 overflow-y-auto py-4 hide-scrollbar">
                 <nav class="px-4 space-y-1">
                     <!-- Main Navigation -->
                     <div class="sidebar-section">
                         <div class="sidebar-section-title">Menu Utama</div>
                         
-                        <a href="<?= base_url('admin/dashboard') ?>" 
+                        <a href="<?= base_url('admin/dashboard') ?>"
                            class="sidebar-item flex items-center px-4 py-3 text-white rounded-lg <?= ($current_page ?? '') === 'dashboard' ? 'active' : '' ?>">
                             <i class="fas fa-home w-5 h-5 mr-3"></i>
                             <span>Dashboard</span>
                         </a>
                         
-                        <a href="<?= base_url('admin/konten') ?>" 
+                        <a href="<?= base_url('admin/konten') ?>"
                            class="sidebar-item flex items-center px-4 py-3 text-white rounded-lg <?= ($current_page ?? '') === 'konten' ? 'active' : '' ?>">
                             <i class="fas fa-file-text w-5 h-5 mr-3"></i>
                             <span>Manajemen Konten</span>
                         </a>
                         
-                        <a href="<?= base_url('admin/users') ?>" 
+                        <a href="<?= base_url('admin/users') ?>"
                            class="sidebar-item flex items-center px-4 py-3 text-white rounded-lg <?= ($current_page ?? '') === 'users' ? 'active' : '' ?>">
                             <i class="fas fa-users w-5 h-5 mr-3"></i>
                             <span>Manajemen User</span>
@@ -312,7 +309,7 @@
                         
                         <!-- Maps Dropdown -->
                         <div class="relative">
-                            <button onclick="toggleDropdown('maps-dropdown')" 
+                            <button onclick="toggleDropdown('maps-dropdown')"
                                     class="sidebar-item w-full flex items-center justify-between px-4 py-3 text-white rounded-lg <?= in_array(($current_page ?? ''), ['maps', 'maps-list', 'maps-add', 'maps-edit']) ? 'active' : '' ?>">
                                 <div class="flex items-center">
                                     <i class="fas fa-map-marked-alt w-5 h-5 mr-3"></i>
@@ -322,22 +319,53 @@
                             </button>
                             
                             <div id="maps-dropdown" class="sidebar-dropdown <?= in_array(($current_page ?? ''), ['maps', 'maps-list', 'maps-add', 'maps-edit']) ? 'open' : '' ?>">
-                                <a href="<?= base_url('admin/maps') ?>" 
+                                <a href="<?= base_url('admin/maps') ?>"
                                    class="sidebar-dropdown-item flex items-center text-white rounded-lg <?= ($current_page ?? '') === 'maps' ? 'active' : '' ?>">
                                     <i class="fas fa-globe w-4 h-4 mr-3"></i>
                                     <span>Peta Interaktif</span>
                                 </a>
                                 
-                                <a href="<?= base_url('admin/maps/list') ?>" 
+                                <a href="<?= base_url('admin/maps/list') ?>"
                                    class="sidebar-dropdown-item flex items-center text-white rounded-lg <?= ($current_page ?? '') === 'maps-list' ? 'active' : '' ?>">
                                     <i class="fas fa-list w-4 h-4 mr-3"></i>
                                     <span>Daftar Lokasi</span>
                                 </a>
                                 
-                                <a href="<?= base_url('admin/maps/add') ?>" 
+                                <a href="<?= base_url('admin/maps/add') ?>"
                                    class="sidebar-dropdown-item flex items-center text-white rounded-lg <?= ($current_page ?? '') === 'maps-add' ? 'active' : '' ?>">
                                     <i class="fas fa-plus w-4 h-4 mr-3"></i>
                                     <span>Tambah Lokasi</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Categories Section -->
+                    <div class="sidebar-section">
+                        <div class="sidebar-section-title">Kategori</div>
+                        
+                        <!-- Categories Dropdown -->
+                        <div class="relative">
+                            <button onclick="toggleDropdown('categories-dropdown')"
+                                    class="sidebar-item w-full flex items-center justify-between px-4 py-3 text-white rounded-lg <?= in_array(($current_page ?? ''), ['categories', 'categories-add', 'categories-edit']) ? 'active' : '' ?>">
+                                <div class="flex items-center">
+                                    <i class="fas fa-tags w-5 h-5 mr-3"></i>
+                                    <span>Manajemen Kategori</span>
+                                </div>
+                                <i class="fas fa-chevron-down dropdown-arrow" id="categories-dropdown-arrow"></i>
+                            </button>
+                            
+                            <div id="categories-dropdown" class="sidebar-dropdown <?= in_array(($current_page ?? ''), ['categories', 'categories-add', 'categories-edit']) ? 'open' : '' ?>">
+                                <a href="<?= base_url('admin/categories') ?>"
+                                   class="sidebar-dropdown-item flex items-center text-white rounded-lg <?= ($current_page ?? '') === 'categories' ? 'active' : '' ?>">
+                                    <i class="fas fa-list w-4 h-4 mr-3"></i>
+                                    <span>Daftar Kategori</span>
+                                </a>
+                                
+                                <a href="<?= base_url('admin/categories/add') ?>"
+                                   class="sidebar-dropdown-item flex items-center text-white rounded-lg <?= ($current_page ?? '') === 'categories-add' ? 'active' : '' ?>">
+                                    <i class="fas fa-plus w-4 h-4 mr-3"></i>
+                                    <span>Tambah Kategori</span>
                                 </a>
                             </div>
                         </div>
@@ -347,7 +375,7 @@
                     <div class="sidebar-section">
                         <div class="sidebar-section-title">Sistem</div>
                         
-                        <a href="<?= base_url('admin/settings') ?>" 
+                        <a href="<?= base_url('admin/settings') ?>"
                            class="sidebar-item flex items-center px-4 py-3 text-white rounded-lg <?= ($current_page ?? '') === 'settings' ? 'active' : '' ?>">
                             <i class="fas fa-cog w-5 h-5 mr-3"></i>
                             <span>Pengaturan</span>
@@ -355,7 +383,6 @@
                     </div>
                 </nav>
             </div>
-
         </div>
     </div>
 
@@ -462,10 +489,20 @@
         document.addEventListener('DOMContentLoaded', function() {
             const currentPage = '<?= $current_page ?? '' ?>';
             const mapsPages = ['maps', 'maps-list', 'maps-add', 'maps-edit'];
+            const categoriesPages = ['categories', 'categories-add', 'categories-edit'];
             
             if (mapsPages.includes(currentPage)) {
                 const dropdown = document.getElementById('maps-dropdown');
                 const arrow = document.getElementById('maps-dropdown-arrow');
+                if (dropdown && arrow) {
+                    dropdown.classList.add('open');
+                    arrow.classList.add('rotated');
+                }
+            }
+            
+            if (categoriesPages.includes(currentPage)) {
+                const dropdown = document.getElementById('categories-dropdown');
+                const arrow = document.getElementById('categories-dropdown-arrow');
                 if (dropdown && arrow) {
                     dropdown.classList.add('open');
                     arrow.classList.add('rotated');
@@ -513,7 +550,7 @@
                 notification.innerHTML = `<i class="fas fa-exclamation-triangle mr-2"></i>${message}`;
             } else {
                 notification.classList.add('bg-blue-500');
-                notification.innerHTML = `<i class="fas fa-info-circle mr-2</i>${message}`;
+                notification.innerHTML = `<i class="fas fa-info-circle mr-2"></i>${message}`;
             }
 
             document.body.appendChild(notification);
