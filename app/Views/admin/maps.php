@@ -255,7 +255,7 @@
     // Load locations from server
     async function loadLocations() {
         try {
-            const response = await fetch('<?= base_url('admin/maps/get-locations') ?>');
+            const response = await fetch('<?= base_url('admin/api/locations') ?>');
             locations = await response.json();
             
             displayLocations();
