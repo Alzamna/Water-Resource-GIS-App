@@ -1,11 +1,24 @@
 FROM php:8.2-apache
 
 RUN apt-get update && apt-get install -y \
-    libzip-dev \
+    git \
     unzip \
     zip \
-    git \
-    && docker-php-ext-install mysqli pdo pdo_mysql
+    libzip-dev \
+    libicu-dev \
+    libonig-dev \
+    libpng-dev \
+    libjpeg62-turbo-dev \
+    libfreetype6-dev \
+    curl
+
+RUN docker-php-ext-install \
+    mysqli \
+    pdo \
+    pdo_mysql \
+    intl \
+    mbstring \
+    zip
 
 RUN a2enmod rewrite
 
@@ -15,7 +28,7 @@ WORKDIR /var/www/html
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install 
 
 RUN chown -R www-data:www-data writable
 
