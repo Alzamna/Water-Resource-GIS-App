@@ -40,4 +40,4 @@ volumes:
   db_data:
 
 networks:
-  ci4-network:
+  gis-network:
