@@ -1,0 +1,43 @@
+services:
+  app:
+    build: .
+    container_name: gis-app
+
+    restart: unless-stopped
+
+    ports:
+      - "8082:80"
+
+    volumes:
+      - ./writable:/var/www/html/writable
+
+    depends_on:
+      - db
+
+    networks:
+      - gis-network
+
+  db:
+    image: mariadb:11
+
+    container_name: gis-db
+
+    restart: unless-stopped
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root123
+      MYSQL_DATABASE: gis_project
+      MYSQL_USER: gis
+      MYSQL_PASSWORD: gis
+
+    volumes:
+      - db_data:/var/lib/mysql
+
+    networks:
+      - gis-network
+
+volumes:
+  db_data:
+
+networks:
+  ci4-network:
